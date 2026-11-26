@@ -109,6 +109,9 @@ export function ReportScreen() {
                 {state.measured.some((row) => row.source.includes("AnswerThePublic"))
                   ? `，其中 AnswerThePublic ${state.measured.filter((row) => row.source.includes("AnswerThePublic")).length} 条`
                   : ""}
+                {state.measured.some((row) => row.source.includes("DataForSEO"))
+                  ? `，其中 DataForSEO ${state.measured.filter((row) => row.source.includes("DataForSEO")).length} 条`
+                  : ""}
                 。
               </p>
             </div>
@@ -116,7 +119,7 @@ export function ReportScreen() {
           <section className="mt-3">
             <h3 className="text-sm font-semibold">下一步</h3>
             <ol className="mt-1 list-decimal pl-4 text-xs leading-5">
-              <li>按客户市场，用关键字规划师导出批发词，或在数据工位用 AnswerThePublic 查种子词。只有点了检索并写入词表的才算实测，来源会标明 AnswerThePublic。</li>
+              <li>按客户市场，用关键字规划师导出批发词，或在数据工位用 AnswerThePublic、DataForSEO 查种子词。只有点了检索并写入词表的才算实测，来源会标明是哪一家。</li>
               <li>向档口要样品、实价、交期，覆盖报告里的示例价带。</li>
               <li>认证只列「需核实」。客户点名的项目，逐项问工厂或实验室，不要把清单抄进合同。</li>
               <li>若客户之后才问独立站，再打开可选的站点提纲。选品本身不依赖建站。</li>
@@ -124,7 +127,7 @@ export function ReportScreen() {
           </section>
           <footer className="mt-3 border-t border-zinc-300 pt-2 text-[11px] leading-5 text-zinc-600">
             <p><ProvBadge kind="sample" /> 价带、起订、交期、搜索量、CPC、难度、趋势、机会指数。</p>
-            <p><ProvBadge kind="measured" /> 数据工位粘贴的关键字规划师、Trends、当次搜索，以及写入词表的 AnswerThePublic 结果。来源写在词行上。</p>
+            <p><ProvBadge kind="measured" /> 数据工位粘贴的关键字规划师、Trends、当次搜索，以及写入词表的 AnswerThePublic 和 DataForSEO 结果。来源写在词行上。没返回的数字保持未知。</p>
             <p><ProvBadge kind="unknown" /> 进口额、真实询盘、未贴的当地语言搜索量、未做的检测。</p>
             <p><ProvBadge kind="assumption" /> {INQUIRY_FORMULA}</p>
             <p>{SCORE_FORMULA}</p>

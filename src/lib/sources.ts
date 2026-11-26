@@ -7,15 +7,15 @@ export const DATA_SOURCES = [
   },
   {
     question: "有没有人在搜、大概多少",
-    tool: "Google Ads 关键字规划师",
-    gives: "月均搜索量、竞争程度、页首出价区间",
-    not: "不是网站流量，不是询盘数，也不是广告账户实际花费",
+    tool: "DataForSEO 的 Google Ads 搜索量，或自己导出的关键字规划师",
+    gives: "月均搜索量、竞争程度、页首出价、CPC",
+    not: "不是网站流量，不是询盘数，也不是广告账户实际花费。DataForSEO 没返回的格子保持未知，不能写成 0",
   },
   {
     question: "趋势是升是降、有没有季节性",
-    tool: "Google Trends",
-    gives: "相对热度指数（通常 0–100）和地区比较",
-    not: "不是绝对搜索量，不能和 Keyword Planner 的次数直接相加",
+    tool: "Google Trends，或数据工位里的 DataForSEO 趋势热度",
+    gives: "相对热度指数（通常 0–100）和相关查询",
+    not: "不是绝对搜索量，不能和搜索量直接相加。上升幅度不是热度指数",
   },
   {
     question: "词难不难、对手大概占哪些词",

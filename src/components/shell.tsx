@@ -17,7 +17,7 @@ const NAV = [
   { href: "/trends", label: "行情推新", icon: Table2, hint: "主动出击" },
   { href: "/products", label: "单品分析", icon: FlaskConical, hint: "拆一个品" },
   { href: "/report", label: "选品报告", icon: FileText, hint: "一页给同事" },
-  { href: "/data", label: "数据工位", icon: FlaskConical, hint: "粘贴实测" },
+  { href: "/data", label: "数据工位", icon: FlaskConical, hint: "查词实测" },
 ];
 
 export function Shell({ children }: { children: React.ReactNode }) {

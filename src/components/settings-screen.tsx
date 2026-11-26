@@ -93,7 +93,7 @@ export function SettingsScreen() {
       <Card className="p-4">
         <h2 className="font-medium">示例数据</h2>
         <p className="mt-1 text-sm leading-6 text-muted-foreground">
-          当前有 {state.cases.length} 个案例、{state.measured.length} 条实测词、{state.serp.length} 行搜索观察。恢复示例会清掉这些录入，清掉本浏览器里尚未写入词表的 AnswerThePublic 结果，并放回预置的美国礼品询盘。
+          当前有 {state.cases.length} 个案例、{state.measured.length} 条实测词、{state.serp.length} 行搜索观察。恢复示例会清掉这些录入，清掉本浏览器里尚未写入词表的 AnswerThePublic 和 DataForSEO 结果，并放回预置的美国礼品询盘。
         </p>
         <Button className="mt-3" variant="destructive" onClick={() => { resetAll(); toast.success("已恢复示例数据"); }}>恢复示例并清空录入</Button>
       </Card>
