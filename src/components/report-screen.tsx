@@ -106,11 +106,11 @@ export function ReportScreen() {
               <h3 className="text-sm font-semibold">竞争快照</h3>
               <p className="mt-1 text-xs leading-5 text-zinc-700">
                 头词通常是平台和品牌，贸易公司的切口在批发词、样品和交期。本页不引用虚构的竞品流量。前十以数据工位里的当次观察为准；现在已贴 {state.serp.length} 行，实测词 {state.measured.length} 条
-                {state.measured.some((row) => row.source.includes("AnswerThePublic"))
-                  ? `，其中 AnswerThePublic ${state.measured.filter((row) => row.source.includes("AnswerThePublic")).length} 条`
+                {state.measured.some((row) => row.origin === "answerthepublic")
+                  ? `，其中 AnswerThePublic ${state.measured.filter((row) => row.origin === "answerthepublic").length} 条`
                   : ""}
-                {state.measured.some((row) => row.source.includes("DataForSEO"))
-                  ? `，其中 DataForSEO ${state.measured.filter((row) => row.source.includes("DataForSEO")).length} 条`
+                {state.measured.some((row) => row.origin === "dataforseo")
+                  ? `，其中 DataForSEO ${state.measured.filter((row) => row.origin === "dataforseo").length} 条`
                   : ""}
                 。
               </p>

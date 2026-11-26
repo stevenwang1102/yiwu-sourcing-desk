@@ -85,12 +85,14 @@ export function FieldSelect({
   options,
   placeholder,
   className,
+  ariaLabel,
 }: {
   value: string;
   onChange: (value: string) => void;
   options: { value: string; label: string }[];
   placeholder?: string;
   className?: string;
+  ariaLabel?: string;
 }) {
   const items = Object.fromEntries(options.map((option) => [option.value, option.label]));
   return (
@@ -101,7 +103,7 @@ export function FieldSelect({
         if (typeof next === "string") onChange(next);
       }}
     >
-      <SelectTrigger className={cn("w-full", className)}>
+      <SelectTrigger className={cn("w-full", className)} aria-label={ariaLabel}>
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>

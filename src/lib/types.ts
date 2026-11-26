@@ -4,6 +4,22 @@ export type MarketId = "US" | "UK" | "DE" | "AU" | "ME" | "JP";
 
 export type Provenance = "sample" | "measured" | "unknown" | "assumption";
 
+/** 词库里一条词的实际来源。只包含本工作台真正会写入的途径。 */
+export type KeywordOrigin =
+  | "answerthepublic"
+  | "dataforseo"
+  | "keyword-planner"
+  | "google-trends"
+  | "manual"
+  | "custom";
+
+/** 海外买家。只存名字，不是客户管理系统。 */
+export interface Customer {
+  id: string;
+  name: string;
+  createdAt: string;
+}
+
 export type IntentId =
   | "survey"
   | "wholesale"
@@ -131,7 +147,12 @@ export interface MeasuredKeyword {
   cpc?: number | null;
   /** questions / prepositions / comparisons 等来源桶。 */
   atpBucket?: string | null;
+  /** 给人看的来源说明，例如「DataForSEO · 搜索量」。筛选以 origin 为准。 */
   source: string;
+  /** 这条词从哪来。写入工具结果时自动带上，之后可以改。 */
+  origin: KeywordOrigin;
+  /** 归到哪位海外买家。空表示还没指定。 */
+  customerId: string | null;
   pastedAt: string;
   productId: string | null;
   note: string;
@@ -160,6 +181,10 @@ export interface AppState {
   workspace: Workspace;
   inquiries: Inquiry[];
   cases: SavedCase[];
+  /** 词库里可选的海外买家。 */
+  customers: Customer[];
+  /** 之后写入词库时默认归到的客户。 */
+  assignCustomerId: string | null;
   measured: MeasuredKeyword[];
   serp: SerpRow[];
   notes: Record<string, string>;

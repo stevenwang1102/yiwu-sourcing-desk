@@ -21,6 +21,7 @@ import {
 import { intentLabel, sentimentLabel } from "@/lib/atp/messages";
 import { getAtpSession, getServerAtpSession, sessionFromCreate, subscribeAtpSession, writeAtpSession, type AtpSession } from "@/lib/atp/session";
 import type { AtpAccountResponse, AtpKeywordRow, AtpProgressResponse, AtpPublicError, AtpReportResponse, AtpSearchResponse, RateHint } from "@/lib/atp/types";
+import { assignCustomerPhrase } from "@/lib/keyword-origin";
 import { matchProductId } from "@/lib/match-product";
 import { useStore } from "@/lib/storage";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
@@ -47,7 +48,7 @@ function mergeRows(current: AtpKeywordRow[], incoming: AtpKeywordRow[]) {
 
 export function AtpPanel({ initialKeyword, initialMarket }: { initialKeyword: string; initialMarket: string }) {
   const preset = presetForDesk(initialMarket);
-  const { addMeasured } = useStore();
+  const { addMeasured, state } = useStore();
   const [keyword, setKeyword] = useState(initialKeyword);
   const [marketId, setMarketId] = useState<string>(preset.id);
   const [language, setLanguage] = useState<string>(preset.language);
@@ -300,6 +301,8 @@ export function AtpPanel({ initialKeyword, initialMarket }: { initialKeyword: st
       cpc: row.cpc,
       atpBucket: row.bucket,
       source: `AnswerThePublic · ${providerLabel(row.provider)}`,
+      origin: "answerthepublic",
+      customerId: state.assignCustomerId,
       productId: matchProductId(row.keyword),
       note: [
         bucketLabel(row.bucket),
@@ -310,7 +313,7 @@ export function AtpPanel({ initialKeyword, initialMarket }: { initialKeyword: st
         "搜索量和 CPC 来自 AnswerThePublic。没有数字的记为未知，不是 0。CPC 不是页首出价，也不是广告账户实际花费。",
       ].filter(Boolean).join(" · "),
     })));
-    toast.success(`已写入 ${capped.length} 条实测。来源 AnswerThePublic。`);
+    toast.success(`已写入 ${capped.length} 条实测。来源 AnswerThePublic，客户 ${assignCustomerPhrase(state.customers, state.assignCustomerId)}。`);
   }
 
   const configured = account?.ok === true;
@@ -462,7 +465,7 @@ export function AtpPanel({ initialKeyword, initialMarket }: { initialKeyword: st
                   </Button>
                 ) : null}
               </div>
-              <p className="text-xs text-muted-foreground">写入词表后，单品页能对上的词会用实测盖住示例。再读下一页或换结构都会再计一次读取额度。</p>
+              <p className="text-xs text-muted-foreground">写入关键词库后，单品页能对上的词会用实测盖住示例。来源写成 AnswerThePublic，客户归到 {assignCustomerPhrase(state.customers, state.assignCustomerId)}。再读下一页或换结构都会再计一次读取额度。</p>
               {visibleRows.length ? (
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[860px] text-left text-sm">

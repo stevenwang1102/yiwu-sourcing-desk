@@ -3,6 +3,7 @@
 import { FieldSelect, LinkButton, ProvBadge } from "@/components/bits";
 import { Button } from "@/components/ui/button";
 import { CATEGORIES, MARKETS } from "@/lib/markets";
+import { keywordStatus } from "@/lib/keyword-origin";
 import { useStore } from "@/lib/storage";
 import { cn } from "cn";
 import { BarChart3, FileText, FlaskConical, Menu, Moon, Settings, Sparkles, Sun, Table2, X } from "lucide-react";
@@ -27,7 +28,8 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const markets = MARKETS.filter((item) => settings.markets.includes(item.id));
   const categories = CATEGORIES.filter((item) => settings.categories.includes(item.id));
-  const measured = state.measured.length;
+  const measured = state.measured.filter((row) => keywordStatus(row) === "measured").length;
+  const libraryCount = state.measured.length;
 
   const nav = (
     <div className="flex h-full flex-col">
@@ -107,9 +109,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
                 </LinkButton>
               ) : null}
               <span className="hidden items-center gap-1 md:flex" suppressHydrationWarning>
-                <ProvBadge kind={measured ? "measured" : "sample"} suppressHydrationWarning />
+                <ProvBadge kind={measured ? "measured" : libraryCount ? "unknown" : "sample"} suppressHydrationWarning />
                 <span className="text-xs text-muted-foreground" suppressHydrationWarning>
-                  {measured ? `${measured} 条实测词` : "尚无实测"}
+                  {measured ? `${measured} 条实测词` : libraryCount ? `词库 ${libraryCount} 条` : "尚无实测"}
                 </span>
               </span>
               <Button
