@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useMemo, useSyncExternalStore } from "react";
+import { clearAtpSession } from "./atp/session";
 import { recommendFor, toStored } from "./recommend";
 import { DEFAULT_SETTINGS } from "./markets";
 import type {
@@ -249,7 +250,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
             },
           };
         }),
-      resetAll: () => persist(seedState()),
+      resetAll: () => {
+        clearAtpSession();
+        persist(seedState());
+      },
     };
   }, []);
 

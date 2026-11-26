@@ -30,7 +30,10 @@ export function ProductScreen() {
   const scored = product ? scoreProduct(product, workspace.market) : null;
   const rows = product ? keywordRows(product, workspace.market) : [];
   const measuredMap = new Map<string, (typeof state.measured)[number]>();
-  for (const row of state.measured) measuredMap.set(normalizeKeyword(row.keyword), row);
+  for (const row of state.measured) {
+    const key = normalizeKeyword(row.keyword);
+    if (!measuredMap.has(key)) measuredMap.set(key, row);
+  }
 
   if (!product) {
     return (
@@ -152,13 +155,20 @@ export function ProductScreen() {
                 const svKind = hit?.monthlySearches != null ? "measured" : row.sampleSv == null ? "unknown" : "sample";
                 return (
                   <tr key={row.keyword} className="border-b last:border-0">
-                    <td className="py-2 pr-2">{row.keyword}</td>
+                    <td className="py-2 pr-2">
+                      {row.keyword}
+                      {hit ? <span className="mt-0.5 block text-[11px] text-muted-foreground">{hit.source}</span> : null}
+                    </td>
                     <td className="py-2 pr-2">{INTENT_MAP[row.intent].name}</td>
                     <td className="py-2 pr-2"><span className="mr-1">{sv ?? "—"}</span><ProvBadge kind={svKind} /></td>
                     <td className="py-2 pr-2">{row.sampleKd ?? "未知"} <ProvBadge kind={row.sampleKd == null ? "unknown" : "sample"} /></td>
                     <td className="py-2 pr-2">
-                      {hit?.bidLow != null || hit?.bidHigh != null ? (
+                      {hit?.cpc != null ? (
+                        <span>CPC ${hit.cpc} <ProvBadge kind="measured" /></span>
+                      ) : hit && (hit.bidLow != null || hit.bidHigh != null) ? (
                         <span>出价 {hit.bidLow ?? "—"}–{hit.bidHigh ?? "—"} {hit.bidCurrency ?? ""} <ProvBadge kind="measured" /></span>
+                      ) : hit ? (
+                        <span>未知 <ProvBadge kind="unknown" /></span>
                       ) : (
                         <span>{row.sampleCpc != null ? `$${row.sampleCpc.toFixed(2)}` : "未知"} <ProvBadge kind={row.sampleCpc == null ? "unknown" : "sample"} /></span>
                       )}
@@ -181,12 +191,22 @@ export function ProductScreen() {
                 .filter((row) => row.productId === product.id && !rows.some((item) => normalizeKeyword(item.keyword) === normalizeKeyword(row.keyword)))
                 .map((row) => (
                   <li key={row.id}>
-                    {row.keyword} · 月搜索 {row.monthlySearches ?? "未知"} · 热度 {row.trendIndex ?? "—"} <ProvBadge kind="measured" />
+                    {row.keyword} · {row.source} · 月搜索 {row.monthlySearches ?? "未知"}
+                    {row.cpc != null ? ` · CPC $${row.cpc}` : ""}
+                    {row.trendIndex != null ? ` · 热度 ${row.trendIndex}` : ""}
+                    {row.bidLow != null || row.bidHigh != null ? ` · 出价 ${row.bidLow ?? "—"}–${row.bidHigh ?? "—"}` : ""}
+                    {" "}<ProvBadge kind="measured" />
                   </li>
                 ))}
             </ul>
           </div>
         ) : null}
+        <p className="mt-3 text-sm leading-6">
+          <Link className="underline underline-offset-2" href={`/data?keyword=${encodeURIComponent(product.nameEn)}&market=${workspace.market}`}>
+            到数据工位用 AnswerThePublic 查「{product.nameEn}」
+          </Link>
+          。打开页面只检查额度，不会创建检索。查到并写入词表后，对得上的词在这里标成实测，来源写 AnswerThePublic。
+        </p>
         <div className="mt-3 space-y-2">
           <p className="text-sm font-medium">把关键字规划师表贴在这里</p>
           <Textarea value={paste} rows={4} placeholder={"Keyword\tAvg. monthly searches\tCompetition\tTop of page bid (low range)\tTop of page bid (high range)"} onChange={(event) => setPaste(event.target.value)} />

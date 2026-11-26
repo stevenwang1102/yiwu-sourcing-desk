@@ -1,19 +1,25 @@
 "use client";
 
+import { AtpPanel } from "@/components/atp-panel";
 import { ProvBadge, SectionTitle } from "@/components/bits";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { PRODUCTS } from "@/lib/catalog";
-import { normalizeKeyword, parseKeywordPaste, parseSerpPaste } from "@/lib/parse-metrics";
+import { matchProductId } from "@/lib/match-product";
+import { parseKeywordPaste, parseSerpPaste } from "@/lib/parse-metrics";
 import { DATA_SOURCES } from "@/lib/sources";
 import { useStore } from "@/lib/storage";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
 export function DataScreen() {
-  const { state, addMeasured, removeMeasured, addSerp, removeSerp } = useStore();
+  const params = useSearchParams();
+  const { state, workspace, addMeasured, removeMeasured, addSerp, removeSerp } = useStore();
+  const initialKeyword = params.get("keyword")?.slice(0, 255) ?? "";
+  const initialMarket = params.get("market") || workspace.market;
   const [source, setSource] = useState<"Keyword Planner" | "Google Trends">("Keyword Planner");
   const [text, setText] = useState("");
   const [serpText, setSerpText] = useState("");
@@ -33,7 +39,7 @@ export function DataScreen() {
     addMeasured(parsed.rows.map((row) => ({
       ...row,
       source,
-      productId: guessProduct(row.keyword),
+      productId: matchProductId(row.keyword),
       note: source === "Google Trends" ? "相对热度，不是搜索量" : "页首出价是广告出价区间",
     })));
     toast.success(`写入 ${parsed.rows.length} 行。${parsed.warnings.join(" ")}`);
@@ -46,7 +52,7 @@ export function DataScreen() {
       toast.error(parsed.warnings[0] ?? "没有行");
       return;
     }
-    addSerp(parsed.rows.map((row) => ({ ...row, source: "手工搜索", productId: guessProduct(row.keyword) })));
+    addSerp(parsed.rows.map((row) => ({ ...row, source: "手工搜索", productId: matchProductId(row.keyword) })));
     toast.success(`写入 ${parsed.rows.length} 条当次观察`);
     setSerpText("");
   }
@@ -63,7 +69,7 @@ export function DataScreen() {
         <p className="text-xs tracking-[0.16em] text-muted-foreground uppercase">Data desk</p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight">数据工位</h1>
         <p className="mt-1 max-w-3xl text-sm leading-6 text-muted-foreground">
-          把工具里导出的表贴进来。贴上来的才标实测；空着的保持未知；目录里原来的数字继续标示例。这里不会自动改用示例去填空。
+          可以在下面用 AnswerThePublic 查一个种子词，也可以把关键字规划师、Trends 或当次搜索结果贴进来。只有查到或贴上来的才标实测；空着的保持未知；目录里原来的数字继续标示例。
         </p>
       </div>
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -74,9 +80,10 @@ export function DataScreen() {
       </div>
       {!state.measured.length ? (
         <Card className="p-4 text-sm leading-6">
-          还没有实测。打开 Google Ads → 工具 → 关键字规划师，选目标国家和语言，导出关键字、月均搜索量、竞争程度、页首出价低/高。不要把 Semrush 的估算和规划师的次数贴成同一列还不改来源。
+          还没有写入词表的实测。可以点下面的「开始检索」向 AnswerThePublic 要疑问句和搜索量，或把关键字规划师导出表贴进来。不要把 Semrush 的估算和规划师的次数贴成同一列还不改来源。
         </Card>
       ) : null}
+      <AtpPanel key={`${initialKeyword}:${initialMarket}`} initialKeyword={initialKeyword} initialMarket={initialMarket} />
       <div className="grid gap-4 lg:grid-cols-2">
         <Card className="p-4">
           <SectionTitle title="粘贴关键字或趋势" />
@@ -100,7 +107,7 @@ export function DataScreen() {
         <div className="overflow-x-auto">
           <table className="w-full min-w-[720px] text-left text-sm">
             <thead className="text-xs text-muted-foreground">
-              <tr className="border-b"><th className="py-2">词</th><th>来源</th><th>月搜索</th><th>热度</th><th>出价</th><th>单品</th><th></th></tr>
+              <tr className="border-b"><th className="py-2">词</th><th>来源</th><th>月搜索</th><th>热度</th><th>CPC / 出价</th><th>单品</th><th></th></tr>
             </thead>
             <tbody>
               {state.measured.slice(0, 40).map((row) => (
@@ -109,7 +116,7 @@ export function DataScreen() {
                   <td className="py-2 pr-2">{row.source}</td>
                   <td className="py-2 pr-2">{row.monthlySearches ?? "未知"}</td>
                   <td className="py-2 pr-2">{row.trendIndex ?? "—"}</td>
-                  <td className="py-2 pr-2">{row.bidLow ?? "—"}–{row.bidHigh ?? "—"} {row.bidCurrency ?? ""}</td>
+                  <td className="py-2 pr-2">{row.cpc != null ? `CPC $${row.cpc}` : row.bidLow != null || row.bidHigh != null ? `${row.bidLow ?? "—"}–${row.bidHigh ?? "—"} ${row.bidCurrency ?? ""}` : "未知"}</td>
                   <td className="py-2 pr-2">{row.productId ? PRODUCTS.find((item) => item.id === row.productId)?.nameZh ?? row.productId : "未挂上"}</td>
                   <td className="py-2"><Button size="sm" variant="ghost" onClick={() => removeMeasured(row.id)}>移除</Button></td>
                 </tr>
@@ -150,11 +157,11 @@ export function DataScreen() {
         </div>
       </Card>
       <Card className="p-4">
-        <SectionTitle title="以后接关键字接口" action={<ProvBadge kind="unknown" />} />
+        <SectionTitle title="DataForSEO 状态" action={<ProvBadge kind="unknown" />} />
         <p className="text-sm leading-6 text-muted-foreground">
-          v1 只留一个不会外呼的状态检查。即使服务器上有环境变量，这个按钮也不会向 DataForSEO 或 Google 发请求，因此不会扣费。密钥不要写进仓库。
+          这个按钮仍然不会向 DataForSEO 或 Google Ads 发请求，因此不会产生那一边的费用。AnswerThePublic 只在上面的表单里点「开始检索」后才会调用。
         </p>
-        <Button className="mt-3" variant="outline" onClick={checkApi}>检查接口状态</Button>
+        <Button className="mt-3" variant="outline" onClick={checkApi}>检查 DataForSEO 占位接口</Button>
         <p className="mt-2 text-sm">{status}</p>
       </Card>
     </div>
@@ -170,14 +177,3 @@ function Stat({ label, value, kind }: { label: string; value: number; kind: "mea
   );
 }
 
-function guessProduct(keyword: string) {
-  const text = normalizeKeyword(keyword);
-  let best: { id: string; len: number } | null = null;
-  for (const product of PRODUCTS) {
-    for (const term of [product.nameEn, ...product.aliases]) {
-      const needle = term.toLowerCase();
-      if (needle.length >= 4 && text.includes(needle) && (!best || needle.length > best.len)) best = { id: product.id, len: needle.length };
-    }
-  }
-  return best?.id ?? null;
-}
