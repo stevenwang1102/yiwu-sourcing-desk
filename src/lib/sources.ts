@@ -1,5 +1,11 @@
 export const DATA_SOURCES = [
   {
+    question: "买家会怎么问、还会带哪些介词和比较",
+    tool: "AnswerThePublic",
+    gives: "疑问句、介词、比较和字母词，以及接口实际返回的月搜索量、CPC、意图和情绪",
+    not: "不是本工具编的。没返回的搜索量保持未知，不能写成 0。CPC 不是广告账户实际花费，也不是关键字规划师的页首出价",
+  },
+  {
     question: "有没有人在搜、大概多少",
     tool: "Google Ads 关键字规划师",
     gives: "月均搜索量、竞争程度、页首出价区间",

@@ -127,6 +127,10 @@ export interface MeasuredKeyword {
   bidCurrency: string | null;
   /** Google Trends 相对热度 0–100，不是搜索量。 */
   trendIndex: number | null;
+  /** AnswerThePublic 的 cost_per_click。没有就不要填 0。不是页首出价。 */
+  cpc?: number | null;
+  /** questions / prepositions / comparisons 等来源桶。 */
+  atpBucket?: string | null;
   source: string;
   pastedAt: string;
   productId: string | null;
