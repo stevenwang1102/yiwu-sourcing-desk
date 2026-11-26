@@ -1,6 +1,7 @@
 "use client";
 
 import { AtpPanel } from "@/components/atp-panel";
+import { DfsPanel } from "@/components/dfs-panel";
 import { ProvBadge, SectionTitle } from "@/components/bits";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -24,7 +25,6 @@ export function DataScreen() {
   const [text, setText] = useState("");
   const [serpText, setSerpText] = useState("");
   const [serpKeyword, setSerpKeyword] = useState("");
-  const [status, setStatus] = useState("还没有检查接口。");
 
   const linked = state.measured.filter((row) => row.productId).length;
   const withVolume = state.measured.filter((row) => row.monthlySearches != null).length;
@@ -57,19 +57,13 @@ export function DataScreen() {
     setSerpText("");
   }
 
-  async function checkApi() {
-    const response = await fetch("/api/stubs/keyword-metrics");
-    const body = await response.json();
-    setStatus(`${response.status} · ${body.message ?? body.note ?? "无说明"}`);
-  }
-
   return (
     <div className="space-y-5">
       <div>
         <p className="text-xs tracking-[0.16em] text-muted-foreground uppercase">Data desk</p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight">数据工位</h1>
         <p className="mt-1 max-w-3xl text-sm leading-6 text-muted-foreground">
-          可以在下面用 AnswerThePublic 查一个种子词，也可以把关键字规划师、Trends 或当次搜索结果贴进来。只有查到或贴上来的才标实测；空着的保持未知；目录里原来的数字继续标示例。
+          可以在下面用 AnswerThePublic 查疑问句，或用 DataForSEO 查搜索量、建议词、相关词和趋势热度，也可以把关键字规划师、Trends 或当次搜索结果贴进来。只有查到或贴上来的才标实测；空着的保持未知；目录里原来的数字继续标示例。打开页面不会创建检索，也不会扣关键字查询费。
         </p>
       </div>
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -80,10 +74,11 @@ export function DataScreen() {
       </div>
       {!state.measured.length ? (
         <Card className="p-4 text-sm leading-6">
-          还没有写入词表的实测。可以点下面的「开始检索」向 AnswerThePublic 要疑问句和搜索量，或把关键字规划师导出表贴进来。不要把 Semrush 的估算和规划师的次数贴成同一列还不改来源。
+          还没有写入词表的实测。可以点 AnswerThePublic 或 DataForSEO 的「开始检索」，或把关键字规划师导出表贴进来。不要把 Semrush 的估算和规划师的次数贴成同一列还不改来源。
         </Card>
       ) : null}
       <AtpPanel key={`${initialKeyword}:${initialMarket}`} initialKeyword={initialKeyword} initialMarket={initialMarket} />
+      <DfsPanel key={`dfs:${initialKeyword}:${initialMarket}`} initialKeyword={initialKeyword} initialMarket={initialMarket} />
       <div className="grid gap-4 lg:grid-cols-2">
         <Card className="p-4">
           <SectionTitle title="粘贴关键字或趋势" />
@@ -155,14 +150,6 @@ export function DataScreen() {
             </tbody>
           </table>
         </div>
-      </Card>
-      <Card className="p-4">
-        <SectionTitle title="DataForSEO 状态" action={<ProvBadge kind="unknown" />} />
-        <p className="text-sm leading-6 text-muted-foreground">
-          这个按钮仍然不会向 DataForSEO 或 Google Ads 发请求，因此不会产生那一边的费用。AnswerThePublic 只在上面的表单里点「开始检索」后才会调用。
-        </p>
-        <Button className="mt-3" variant="outline" onClick={checkApi}>检查 DataForSEO 占位接口</Button>
-        <p className="mt-2 text-sm">{status}</p>
       </Card>
     </div>
   );

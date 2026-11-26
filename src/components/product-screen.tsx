@@ -207,6 +207,12 @@ export function ProductScreen() {
           </Link>
           。打开页面只检查额度，不会创建检索。查到并写入词表后，对得上的词在这里标成实测，来源写 AnswerThePublic。
         </p>
+        <p className="mt-2 text-sm leading-6">
+          <Link className="underline underline-offset-2" href={`/data?keyword=${encodeURIComponent(product.nameEn)}&market=${workspace.market}#dataforseo`}>
+            到数据工位用 DataForSEO 查「{product.nameEn}」
+          </Link>
+          。只预填关键词和市场，不会自动开始检索，因此不会扣关键字查询费。写入词表后，对得上的词标成实测，来源写 DataForSEO。
+        </p>
         <div className="mt-3 space-y-2">
           <p className="text-sm font-medium">把关键字规划师表贴在这里</p>
           <Textarea value={paste} rows={4} placeholder={"Keyword\tAvg. monthly searches\tCompetition\tTop of page bid (low range)\tTop of page bid (high range)"} onChange={(event) => setPaste(event.target.value)} />

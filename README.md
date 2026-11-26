@@ -28,19 +28,21 @@ npm start
 
 不需要数据库。询盘、粘贴的词表、笔记和设置都在这台浏览器的 localStorage 里。设置页可以「恢复示例并清空录入」。
 
-AnswerThePublic 是可选的。令牌只放在服务器环境变量 `ANSWERTHEPUBLIC_API_TOKEN`，不要加 `NEXT_PUBLIC_` 前缀，也不要写进仓库。没配令牌时，选品台照常打开，数据工位会提示尚未配置。
+AnswerThePublic 和 DataForSEO 都是可选的。令牌和密码只放在服务器环境变量里，不要加 `NEXT_PUBLIC_` 前缀，也不要写进仓库。没配时，选品台照常打开，数据工位会提示尚未配置。
+
+DataForSEO 用 `DATAFORSEO_LOGIN` 和 `DATAFORSEO_PASSWORD`（API 登录名和 API 密码）。两个都要有。打开数据工位时，如果已经配置，只会请求不计费的账户接口看余额和价目，不会创建关键字任务。
 
 ## 部署到 Vercel
 
 这是标准 Next.js 应用，不是纯静态导出。数据工位的接口要跟着服务一起部署，所以不要设 `output: 'export'`。
 
-生产、预览和开发环境如果要在线检索，把 `ANSWERTHEPUBLIC_API_TOKEN` 设成敏感环境变量。留空也可以部署，只是不能向 AnswerThePublic 发检索。
+生产、预览和开发环境如果要在线检索，把 `ANSWERTHEPUBLIC_API_TOKEN`、`DATAFORSEO_LOGIN`、`DATAFORSEO_PASSWORD` 设成敏感环境变量。留空也可以部署，只是对应的检索不可用。
 
 1. 在 [Vercel](https://vercel.com/new) 导入这个仓库。
 2. Framework Preset 选 **Next.js**。Install Command 用 `npm install`，Build Command 用 `npm run build`。不要改 Output Directory，也不要加自定义 Start Command。
-3. 需要在线检索时再填写 `ANSWERTHEPUBLIC_API_TOKEN`，然后 Deploy。
+3. 需要在线检索时再填写上面的环境变量，然后 Deploy。不要把密码写进仓库。
 
-部署完成后，打开 Vercel 给出的地址即可。示例目录会直接出现。检索要到数据工位里手动点，打开页面不会扣搜索额度。
+部署完成后，打开 Vercel 给出的地址即可。示例目录会直接出现。检索要到数据工位里手动点「开始检索」。打开页面不会创建 AnswerThePublic 检索，也不会向 DataForSEO 发关键字任务。
 
 ## 业务员怎么用
 
@@ -57,7 +59,7 @@ AnswerThePublic 是可选的。令牌只放在服务器环境变量 `ANSWERTHEPU
 | 标记 | 含义 |
 | --- | --- |
 | 示例 | 预置目录或内部示例口径，不是工具导出 |
-| 实测 | 数据工位粘贴的关键字规划师、Google Trends、当次搜索，或 AnswerThePublic 返回并写入词表的结果。来源会写明 |
+| 实测 | 数据工位粘贴的关键字规划师、Google Trends、当次搜索，或 AnswerThePublic、DataForSEO 返回并写入词表的结果。来源会写明 |
 | 未知 | 还没贴、或这个市场不在主推清单里，不用 0 冒充 |
 | 假设 | 询盘粗算和汇率。默认是「月搜索量 × 8% 点击份额 × 2% 询盘率」，公式写在页面上，比率在设置里改 |
 | 需核实 | 认证、税号、宣称。勾选只表示你问过工厂，不是系统确认已获证 |
@@ -72,12 +74,14 @@ Google Trends 的数字会记成相对热度，不会被写成月搜索量。关
 
 ## 数据工位
 
-两种方式得到实测，都不会在打开页面时扣费。
+三种方式得到实测，都不会在打开页面时扣关键字查询费。
 
 **AnswerThePublic。** 填种子词，选市场、语言和地区，再点「开始检索」。默认只查谷歌网页。相同关键词、语言、地区在 24 小时内会复用，不重复扣搜索额度。报告里的疑问句、介词、比较会带上接口返回的月搜索和 CPC，并标成实测，来源是 AnswerThePublic。没返回的数字保持未知。点「写入当前列表到实测词表」之后，单品页才能用这些词盖住示例。
 
+**DataForSEO。** 在同一个数据工位里选一种查询：搜索量、关键词建议、相关关键词或趋势热度。默认是搜索量，一次只打这一个实时接口。中东要选阿联酋或沙特。点「开始检索」才会查词。本浏览器 24 小时内的相同查询会直接复用；服务器进程里如果还留着最近 6 小时的相同结果，也会复用，并在页面上写明，不再次扣费。返回的月搜索、CPC、出价和热度标为实测，来源写 DataForSEO。接口没给的格子保持未知，不会补 0。趋势热度不是月搜索量。再点「写入当前列表到实测词表」，单品页才能用这些词盖住示例。
+
 **粘贴。** 把关键字规划师或 Trends 的表贴进去，列名认中英文表头。对得上英文品名的词会挂到单品上。
 
-`/api/stubs/keyword-metrics` 和 `/api/stubs/serp` 仍只返回「未外呼、不扣费」，不会请求 DataForSEO。示例见 `.env.example`。
+`/api/stubs/keyword-metrics` 和 `/api/stubs/serp` 仍只返回「未外呼、不扣费」。真正的 DataForSEO 查询在 `/api/dataforseo/lookup`，而且只接受数据工位提交的那一次。示例见 `.env.example`。
 
 界面截图在 `docs/screenshots/`：大盘、按需推荐、行情、单品、报告，以及深色和窄屏。
