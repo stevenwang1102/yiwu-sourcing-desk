@@ -399,7 +399,7 @@ export function AtpPanel({ initialKeyword, initialMarket }: { initialKeyword: st
         </div>
         {initialMarket === "KR" ? (
           <p className="rounded-lg border border-dashed px-3 py-2 text-sm leading-6">
-            选品台当前市场是韩国。AnswerThePublic 的关键词检索没有韩语，这里不会改用英语或美国代替。韩语搜索量请用下面的 DataForSEO，地区选韩国，语言选韩语。
+            义乌洲凯选品台当前市场是韩国。AnswerThePublic 的关键词检索没有韩语，这里不会改用英语或美国代替。韩语搜索量请用下面的 DataForSEO，地区选韩国，语言选韩语。
           </p>
         ) : null}
         <p className="text-xs leading-5 text-muted-foreground">

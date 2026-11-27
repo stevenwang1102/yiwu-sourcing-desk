@@ -38,7 +38,7 @@ export function TrendsScreen() {
       <Board title="季节窗口" cards={board.seasonal} empty="当前筛选没有节日或换季标记。11 月前后，礼品和年初健身会更多出现在其他类目。" onReport={(id) => setReportProducts([id], null)} />
       <Board title="新品窗口" cards={board.fresh} empty="没有标成新品窗口的单品。新品不等于好做，先看合规未知项。" onReport={(id) => setReportProducts([id], null)} />
       <p className="text-xs leading-5 text-muted-foreground">
-        公司名「{settings.companyName}」只出现在报告和侧栏。推新话术默认不冒充工厂，也不把示例趋势说成 Keyword Planner 的结果。
+        公司名「{settings.companyName}」出现在报告抬头。推新话术默认不冒充工厂，也不把示例趋势说成 Keyword Planner 的结果。
       </p>
     </div>
   );

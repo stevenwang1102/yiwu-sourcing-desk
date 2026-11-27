@@ -1,5 +1,6 @@
 "use client";
 
+import { BrandLockup } from "@/components/brand-lockup";
 import { FieldSelect, LinkButton, ProvBadge } from "@/components/bits";
 import { Button } from "@/components/ui/button";
 import { CATEGORIES, MARKETS } from "@/lib/markets";
@@ -34,9 +35,8 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const nav = (
     <div className="flex h-full flex-col">
       <div className="px-4 pt-5 pb-4">
-        <p className="text-[11px] tracking-[0.18em] text-sidebar-foreground/60 uppercase">Yiwu sourcing desk</p>
-        <p className="mt-1 text-lg leading-tight font-semibold text-sidebar-foreground">{settings.companyName}</p>
-        <p className="mt-1 text-xs leading-5 text-sidebar-foreground/70">市场采购公司的选品工作台。推荐给海外买家，不是工厂建站决策。</p>
+        <BrandLockup tone="sidebar" />
+        <p className="mt-3 text-xs leading-5 text-sidebar-foreground/70">市场采购公司的选品工作台。推荐给海外买家，不是工厂建站决策。</p>
       </div>
       <nav className="flex flex-1 flex-col gap-1 px-2">
         {NAV.map((item) => {
@@ -88,6 +88,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
             <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setOpen(true)} aria-label="打开菜单">
               {open ? <X /> : <Menu />}
             </Button>
+            <div className="min-w-0 shrink lg:hidden">
+              <BrandLockup tone="header" />
+            </div>
             <div className="min-w-[220px] flex-1 md:w-[280px] md:flex-none">
               <FieldSelect
                 value={workspace.market}

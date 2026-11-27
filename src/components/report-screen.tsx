@@ -1,5 +1,6 @@
 "use client";
 
+import { BrandLockup } from "@/components/brand-lockup";
 import { GradeMark, ProvBadge } from "@/components/bits";
 import { Button } from "@/components/ui/button";
 import { getProduct } from "@/lib/catalog";
@@ -50,10 +51,9 @@ export function ReportScreen() {
       ) : (
         <article className="report-sheet mx-auto max-w-[920px] bg-white p-6 text-zinc-900 shadow-sm ring-1 ring-black/10 print:max-w-none print:shadow-none print:ring-0 dark:bg-zinc-50">
           <header className="flex items-start justify-between gap-4 border-b border-zinc-300 pb-3">
-            <div>
-              <p className="text-xs tracking-[0.16em] text-zinc-500 uppercase">Selection note</p>
-              <h2 className="text-2xl font-semibold">{settings.companyName}</h2>
-              <p className="text-sm">选品建议 · {marketName(workspace.market)} · {printedAt || "日期在打开后生成"}</p>
+            <div className="min-w-0">
+              <BrandLockup tone="report" name={settings.companyName} nameAs="h2" />
+              <p className="mt-1 pl-14 text-sm">选品建议 · {marketName(workspace.market)} · {printedAt || "日期在打开后生成"}</p>
             </div>
             <p className="max-w-[240px] text-right text-xs leading-5 text-zinc-600">市场采购建议，不是工厂身份，也不是检测报告。认证一律需核实。</p>
           </header>

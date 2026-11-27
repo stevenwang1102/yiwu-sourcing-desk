@@ -1,3 +1,4 @@
+import { PRODUCT_NAME_ZH } from "./brand";
 import type { CategoryId, MarketId, Settings } from "./types";
 
 export const MARKETS: {
@@ -316,7 +317,7 @@ export const CERT_OPTIONS = [
 ];
 
 export const DEFAULT_SETTINGS: Settings = {
-  companyName: "义乌选品台",
+  companyName: PRODUCT_NAME_ZH,
   defaultMarket: "US",
   markets: ["US", "UK", "DE", "AU", "ME", "JP", "ES", "MX", "IT", "FR", "PT", "BR", "NL", "PL", "KR"],
   categories: ["3c", "wellness", "home", "kids", "funny"],

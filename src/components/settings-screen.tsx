@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PRODUCT_NAME_ZH } from "@/lib/brand";
 import { CATEGORIES, MARKETS } from "@/lib/markets";
 import { INQUIRY_FORMULA } from "@/lib/sources";
 import { keywordStatus } from "@/lib/keyword-origin";
@@ -38,11 +39,11 @@ export function SettingsScreen() {
     <div className="mx-auto max-w-3xl space-y-4">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">设置</h1>
-        <p className="mt-1 text-sm leading-6 text-muted-foreground">公司名只用于界面和报告抬头。请使用你们自己的名称，不要把工具假装成某个官方品牌。</p>
+        <p className="mt-1 text-sm leading-6 text-muted-foreground">公司显示名用在报告抬头。侧栏固定为{PRODUCT_NAME_ZH}。请使用你们自己的名称，不要把工具假装成某个官方品牌。</p>
       </div>
       <Card className="space-y-3 p-4">
         <Label htmlFor="company">公司显示名</Label>
-        <Input id="company" value={settings.companyName} onChange={(event) => updateSettings({ companyName: event.target.value || "义乌选品台" })} />
+        <Input id="company" value={settings.companyName} onChange={(event) => updateSettings({ companyName: event.target.value || PRODUCT_NAME_ZH })} />
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="space-y-1 text-sm">
             显示货币

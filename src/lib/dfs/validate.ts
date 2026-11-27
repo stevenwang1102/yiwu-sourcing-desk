@@ -69,12 +69,12 @@ export function parseLookupInput(raw: unknown): { ok: true; value: ParsedLookup 
   const marketId = typeof body.marketId === "string" ? body.marketId.trim() : "";
   const market = marketById(marketId);
   if (!market) {
-    return { ok: false, message: "市场不在选品台已映射的范围内。中东要选阿联酋或沙特，没有单独的「中东」地区。这次没有向 DataForSEO 发请求。" };
+    return { ok: false, message: "市场不在义乌洲凯选品台已映射的范围内。中东要选阿联酋或沙特，没有单独的「中东」地区。这次没有向 DataForSEO 发请求。" };
   }
 
   const languageCode = typeof body.languageCode === "string" ? body.languageCode.trim().toLowerCase() : "";
   if (!LANGUAGE_IDS.has(languageCode)) {
-    return { ok: false, message: "语言不在选品台已映射的范围内。请改用数据工位里列出的语言。这次没有向 DataForSEO 发请求。" };
+    return { ok: false, message: "语言不在义乌洲凯选品台已映射的范围内。请改用数据工位里列出的语言。这次没有向 DataForSEO 发请求。" };
   }
 
   const text = typeof body.text === "string" ? body.text : "";
