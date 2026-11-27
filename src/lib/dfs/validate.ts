@@ -74,7 +74,7 @@ export function parseLookupInput(raw: unknown): { ok: true; value: ParsedLookup 
 
   const languageCode = typeof body.languageCode === "string" ? body.languageCode.trim().toLowerCase() : "";
   if (!LANGUAGE_IDS.has(languageCode)) {
-    return { ok: false, message: "语言不在选品台已映射的范围内。当前可选英语、德语、日语、阿拉伯语。这次没有向 DataForSEO 发请求。" };
+    return { ok: false, message: "语言不在选品台已映射的范围内。请改用数据工位里列出的语言。这次没有向 DataForSEO 发请求。" };
   }
 
   const text = typeof body.text === "string" ? body.text : "";

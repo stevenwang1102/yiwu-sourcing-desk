@@ -9,6 +9,7 @@ import { BROWSER_CACHE_TTL_MS, DFS_LANGUAGES, DFS_MARKETS, DFS_MODES, presetForD
 import { getDfsSession, getServerDfsSession, sessionFromLookup, subscribeDfsSession, writeDfsSession } from "@/lib/dfs/session";
 import type { DfsAccountResponse, DfsKeywordRow, DfsLookupResponse, DfsPublicError } from "@/lib/dfs/types";
 import { parseLookupInput } from "@/lib/dfs/validate";
+import { assignCustomerPhrase } from "@/lib/keyword-origin";
 import { matchProductId } from "@/lib/match-product";
 import { useStore } from "@/lib/storage";
 import { useEffect, useState, useSyncExternalStore } from "react";
@@ -28,7 +29,7 @@ function metricText(value: number | null, asked: boolean, format: (value: number
 
 export function DfsPanel({ initialKeyword, initialMarket }: { initialKeyword: string; initialMarket: string }) {
   const preset = presetForDesk(initialMarket);
-  const { addMeasured } = useStore();
+  const { addMeasured, state } = useStore();
   const [text, setText] = useState(initialKeyword);
   const [marketId, setMarketId] = useState<string>(preset.id);
   const [languageCode, setLanguageCode] = useState<string>(preset.languageCode);
@@ -158,6 +159,8 @@ export function DfsPanel({ initialKeyword, initialMarket }: { initialKeyword: st
       trendIndex: row.trendIndex,
       cpc: row.cpc,
       source: `DataForSEO · ${session.response.modeLabel}`,
+      origin: "dataforseo",
+      customerId: state.assignCustomerId,
       productId: matchProductId(row.keyword),
       note: [
         session.response.channel,
@@ -168,7 +171,7 @@ export function DfsPanel({ initialKeyword, initialMarket }: { initialKeyword: st
         "来自 DataForSEO。没有数字的记为未知，不是 0。CPC 和页首出价不是广告账户实际花费。趋势热度不是月搜索量。",
       ].filter(Boolean).join(" · "),
     })));
-    toast.success(`已写入 ${capped.length} 条实测。来源 DataForSEO。`);
+    toast.success(`已写入 ${capped.length} 条实测。来源 DataForSEO，客户 ${assignCustomerPhrase(state.customers, state.assignCustomerId)}。`);
   }
 
   const spec = DFS_MODES.find((item) => item.id === mode) ?? DFS_MODES[0];
@@ -278,7 +281,7 @@ export function DfsPanel({ initialKeyword, initialMarket }: { initialKeyword: st
             <Input className="max-w-xs" value={filter} placeholder="在当前结果里筛词" onChange={(event) => setFilter(event.target.value)} />
             <Button size="sm" onClick={saveRows}>写入当前列表到实测词表</Button>
           </div>
-          <p className="text-xs text-muted-foreground">写入词表后，单品页能对上的词会用实测盖住示例。来源会写成 DataForSEO。</p>
+          <p className="text-xs text-muted-foreground">写入关键词库后，单品页能对上的词会用实测盖住示例。来源写成 DataForSEO，客户归到 {assignCustomerPhrase(state.customers, state.assignCustomerId)}。</p>
           {visibleRows.length ? (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[860px] text-left text-sm">

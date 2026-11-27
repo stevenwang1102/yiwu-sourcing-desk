@@ -81,9 +81,9 @@ export function Dashboard() {
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <Kpi name="主推单品" value={String(withScore.length)} unit="个" tag="catalog" foot="目录里把该市场列为主推的数量，不是机会预测。" />
-        <Kpi name="机会指数中位" value={indexes.length ? String(median(indexes)) : "—"} unit="" tag="sample" foot="内部示例口径。点开单品可看权重。" />
-        <Kpi name="高意图占比" value={intent == null ? "—" : String(intent)} unit={intent == null ? "" : "%"} tag="sample" foot="按示例搜索量加权，不是按词条数。" />
-        <Kpi name="假设询盘粗算" value={searches.length ? formatInt(inquiry) : "—"} unit={searches.length ? "条/月" : ""} tag="assumption" foot={`搜索量 × ${(settings.clickShare * 100).toFixed(0)}% × ${(settings.inquiryRate * 100).toFixed(0)}%。`} />
+        <Kpi name="机会指数中位" value={indexes.length ? String(median(indexes)) : "未知"} unit="" tag={indexes.length ? "sample" : "unknown"} foot="内部示例口径。这个市场没有主推单品时保持未知。" />
+        <Kpi name="高意图占比" value={intent == null ? "未知" : String(intent)} unit={intent == null ? "" : "%"} tag={intent == null ? "unknown" : "sample"} foot="按示例搜索量加权，不是按词条数。" />
+        <Kpi name="假设询盘粗算" value={searches.length ? formatInt(inquiry) : "未知"} unit={searches.length ? "条/月" : ""} tag={searches.length ? "assumption" : "unknown"} foot={`搜索量 × ${(settings.clickShare * 100).toFixed(0)}% × ${(settings.inquiryRate * 100).toFixed(0)}%。没有示例搜索量时保持未知。`} />
       </div>
 
       <Card className="p-4">
@@ -177,13 +177,14 @@ export function Dashboard() {
               <tbody>
                 {MARKETS.filter((item) => settings.markets.includes(item.id)).map((market) => {
                   const rows = scoped.map((product) => scoreProduct(product, market.id)).filter((item): item is NonNullable<typeof item> => Boolean(item));
+                  const intentShare = weightedIntent(scoped, market.id);
                   return (
                     <tr key={market.id} className={market.id === workspace.market ? "bg-muted/60" : "border-b"}>
                       <td className="py-2">{market.name}</td>
                       <td className="py-2">{rows.length}</td>
-                      <td className="py-2">{median(rows.map((item) => item.signal.monthlySearches!))?.toLocaleString("zh-CN") ?? "—"}</td>
-                      <td className="py-2">{median(rows.map((item) => item.signal.kd!)) ?? "—"}</td>
-                      <td className="py-2">{weightedIntent(scoped, market.id) ?? "—"}%</td>
+                      <td className="py-2">{median(rows.map((item) => item.signal.monthlySearches!))?.toLocaleString("zh-CN") ?? "未知"}</td>
+                      <td className="py-2">{median(rows.map((item) => item.signal.kd!)) ?? "未知"}</td>
+                      <td className="py-2">{intentShare == null ? "未知" : `${intentShare}%`}</td>
                       <td className="py-2">{market.lang}</td>
                     </tr>
                   );
@@ -216,7 +217,7 @@ export function Dashboard() {
   );
 }
 
-function Kpi({ name, value, unit, tag, foot }: { name: string; value: string; unit: string; tag: "sample" | "assumption" | "catalog"; foot: string }) {
+function Kpi({ name, value, unit, tag, foot }: { name: string; value: string; unit: string; tag: "sample" | "assumption" | "catalog" | "unknown"; foot: string }) {
   return (
     <Card className="gap-2 p-4">
       <div className="flex items-center justify-between gap-2">

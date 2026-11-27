@@ -20,7 +20,7 @@ export function validateSearchInput(raw: unknown): { ok: true; value: SearchInpu
 
   const language = typeof body.language === "string" ? body.language.trim().toLowerCase() : "";
   if (!LANGUAGE_IDS.has(language)) {
-    return { ok: false, message: "语言不在选品台已映射的范围内。当前可选英语、德语、日语、阿拉伯语。这次没有创建检索。" };
+    return { ok: false, message: "语言不在选品台已映射的范围内。AnswerThePublic 这里没有韩语，请改用列出的语言。这次没有创建检索。" };
   }
 
   const region = typeof body.region === "string" ? body.region.trim().toLowerCase() : "";

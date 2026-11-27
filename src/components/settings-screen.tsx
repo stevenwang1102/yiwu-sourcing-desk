@@ -7,12 +7,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CATEGORIES, MARKETS } from "@/lib/markets";
 import { INQUIRY_FORMULA } from "@/lib/sources";
+import { keywordStatus } from "@/lib/keyword-origin";
 import { useStore } from "@/lib/storage";
 import type { CategoryId, MarketId } from "@/lib/types";
 import { toast } from "sonner";
 
 export function SettingsScreen() {
   const { settings, updateSettings, resetAll, state } = useStore();
+  const measuredCount = state.measured.filter((row) => keywordStatus(row) === "measured").length;
 
   function toggleMarket(id: MarketId, on: boolean) {
     const markets = on ? [...settings.markets, id] : settings.markets.filter((item) => item !== id);
@@ -93,7 +95,7 @@ export function SettingsScreen() {
       <Card className="p-4">
         <h2 className="font-medium">示例数据</h2>
         <p className="mt-1 text-sm leading-6 text-muted-foreground">
-          当前有 {state.cases.length} 个案例、{state.measured.length} 条实测词、{state.serp.length} 行搜索观察。恢复示例会清掉这些录入，清掉本浏览器里尚未写入词表的 AnswerThePublic 和 DataForSEO 结果，并放回预置的美国礼品询盘。
+          当前有 {state.cases.length} 个案例、词库 {state.measured.length} 条（其中实测 {measuredCount} 条）、{state.customers.length} 个客户、{state.serp.length} 行搜索观察。恢复示例会清掉这些录入和客户名单，清掉本浏览器里尚未写入词表的 AnswerThePublic 和 DataForSEO 结果，并放回预置的美国礼品询盘。
         </p>
         <Button className="mt-3" variant="destructive" onClick={() => { resetAll(); toast.success("已恢复示例数据"); }}>恢复示例并清空录入</Button>
       </Card>

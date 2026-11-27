@@ -35,10 +35,32 @@ test("markets map the same way as AnswerThePublic, and the Middle East is two co
   assert.equal(byId.SA.languageCode, "ar");
   assert.equal(byId.JP.locationCode, 2392);
   assert.equal(byId.JP.languageCode, "ja");
+  assert.equal(byId.ES.locationCode, 2724);
+  assert.equal(byId.ES.languageCode, "es");
+  assert.equal(byId.MX.locationCode, 2484);
+  assert.equal(byId.MX.languageCode, "es");
+  assert.equal(byId.IT.locationCode, 2380);
+  assert.equal(byId.IT.languageCode, "it");
+  assert.equal(byId.FR.locationCode, 2250);
+  assert.equal(byId.FR.languageCode, "fr");
+  assert.equal(byId.PT.locationCode, 2620);
+  assert.equal(byId.PT.languageCode, "pt");
+  assert.equal(byId.BR.locationCode, 2076);
+  assert.equal(byId.BR.languageCode, "pt");
+  assert.equal(byId.NL.locationCode, 2528);
+  assert.equal(byId.NL.languageCode, "nl");
+  assert.equal(byId.PL.locationCode, 2616);
+  assert.equal(byId.PL.languageCode, "pl");
+  assert.equal(byId.KR.locationCode, 2410);
+  assert.equal(byId.KR.languageCode, "ko");
   assert.equal(DFS_MARKETS.some((item) => (item.id as string) === "ME"), false);
   assert.equal(presetForDesk("ME").id, "AE");
   assert.equal(presetForDesk("UK").locationCode, 2826);
   assert.equal(presetForDesk("JP").languageCode, "ja");
+  assert.equal(presetForDesk("ES").locationCode, 2724);
+  assert.equal(presetForDesk("MX").languageCode, "es");
+  assert.equal(presetForDesk("KR").languageCode, "ko");
+  assert.equal(presetForDesk("KR").locationCode, 2410);
 });
 
 test("lookup input rejects anything that would fan out or leave the mapped markets", () => {

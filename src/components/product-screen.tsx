@@ -9,6 +9,7 @@ import { PRODUCTS, getProduct } from "@/lib/catalog";
 import { gradeLabel, signedPct } from "@/lib/format";
 import { INTENT_MAP, INTENTS, keywordRows, sampleSerp, serpVerdict } from "@/lib/keywords";
 import { CATEGORY_MAP, MARKET_MAP } from "@/lib/markets";
+import { assignCustomerPhrase } from "@/lib/keyword-origin";
 import { normalizeKeyword, parseKeywordPaste } from "@/lib/parse-metrics";
 import { difficultyBand, inquiryEstimate, scoreProduct } from "@/lib/scoring";
 import { BUDGET_FORMULA, INQUIRY_FORMULA, SCORE_FORMULA } from "@/lib/sources";
@@ -62,7 +63,9 @@ export function ProductScreen() {
       bidHigh: row.bidHigh,
       bidCurrency: row.bidCurrency,
       trendIndex: row.trendIndex,
-      source: "Keyword Planner",
+      source: "关键字规划师",
+      origin: "keyword-planner",
+      customerId: state.assignCustomerId,
       productId: product!.id,
       note: "从单品页粘贴",
     })));
@@ -217,6 +220,7 @@ export function ProductScreen() {
           <p className="text-sm font-medium">把关键字规划师表贴在这里</p>
           <Textarea value={paste} rows={4} placeholder={"Keyword\tAvg. monthly searches\tCompetition\tTop of page bid (low range)\tTop of page bid (high range)"} onChange={(event) => setPaste(event.target.value)} />
           <Button size="sm" onClick={ingest}>记为实测</Button>
+          <p className="text-xs leading-5 text-muted-foreground">来源记为关键字规划师，客户归到 {assignCustomerPhrase(state.customers, state.assignCustomerId)}。可以到数据工位的关键词库里改。</p>
         </div>
       </Card>
 

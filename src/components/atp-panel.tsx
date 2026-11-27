@@ -21,6 +21,7 @@ import {
 import { intentLabel, sentimentLabel } from "@/lib/atp/messages";
 import { getAtpSession, getServerAtpSession, sessionFromCreate, subscribeAtpSession, writeAtpSession, type AtpSession } from "@/lib/atp/session";
 import type { AtpAccountResponse, AtpKeywordRow, AtpProgressResponse, AtpPublicError, AtpReportResponse, AtpSearchResponse, RateHint } from "@/lib/atp/types";
+import { assignCustomerPhrase } from "@/lib/keyword-origin";
 import { matchProductId } from "@/lib/match-product";
 import { useStore } from "@/lib/storage";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
@@ -47,11 +48,11 @@ function mergeRows(current: AtpKeywordRow[], incoming: AtpKeywordRow[]) {
 
 export function AtpPanel({ initialKeyword, initialMarket }: { initialKeyword: string; initialMarket: string }) {
   const preset = presetForDesk(initialMarket);
-  const { addMeasured } = useStore();
+  const { addMeasured, state } = useStore();
   const [keyword, setKeyword] = useState(initialKeyword);
-  const [marketId, setMarketId] = useState<string>(preset.id);
-  const [language, setLanguage] = useState<string>(preset.language);
-  const [region, setRegion] = useState<string>(preset.region);
+  const [marketId, setMarketId] = useState<string>(preset?.id ?? "unset");
+  const [language, setLanguage] = useState<string>(preset?.language ?? "");
+  const [region, setRegion] = useState<string>(preset?.region ?? "");
   const [provider, setProvider] = useState("gweb");
   const [account, setAccount] = useState<AtpAccountResponse | AtpPublicError | null>(null);
   const [checking, setChecking] = useState(true);
@@ -227,6 +228,10 @@ export function AtpPanel({ initialKeyword, initialMarket }: { initialKeyword: st
       setStatusText("请先填写种子关键词。这次没有创建检索。");
       return;
     }
+    if (!language || !region || marketId === "unset") {
+      setStatusText("请先选择 AnswerThePublic 能查的市场和语言。韩语不会改用英语。这次没有创建检索。");
+      return;
+    }
     stopRef.current = false;
     setRunning(true);
     setStatusText("正在创建检索…");
@@ -300,6 +305,8 @@ export function AtpPanel({ initialKeyword, initialMarket }: { initialKeyword: st
       cpc: row.cpc,
       atpBucket: row.bucket,
       source: `AnswerThePublic · ${providerLabel(row.provider)}`,
+      origin: "answerthepublic",
+      customerId: state.assignCustomerId,
       productId: matchProductId(row.keyword),
       note: [
         bucketLabel(row.bucket),
@@ -310,7 +317,7 @@ export function AtpPanel({ initialKeyword, initialMarket }: { initialKeyword: st
         "搜索量和 CPC 来自 AnswerThePublic。没有数字的记为未知，不是 0。CPC 不是页首出价，也不是广告账户实际花费。",
       ].filter(Boolean).join(" · "),
     })));
-    toast.success(`已写入 ${capped.length} 条实测。来源 AnswerThePublic。`);
+    toast.success(`已写入 ${capped.length} 条实测。来源 AnswerThePublic，客户 ${assignCustomerPhrase(state.customers, state.assignCustomerId)}。`);
   }
 
   const configured = account?.ok === true;
@@ -356,16 +363,27 @@ export function AtpPanel({ initialKeyword, initialMarket }: { initialKeyword: st
                 setLanguage(next.language);
                 setRegion(next.region);
               }}
-              options={ATP_MARKETS.map((item) => ({ value: item.id, label: item.label }))}
+              options={[
+                ...(marketId === "unset" ? [{ value: "unset", label: "请选择市场" }] : []),
+                ...ATP_MARKETS.map((item) => ({ value: item.id, label: item.label })),
+              ]}
             />
           </label>
           <label className="space-y-1 text-sm">
             语言
-            <FieldSelect value={language} onChange={setLanguage} options={ATP_LANGUAGES.map((item) => ({ value: item.id, label: item.label }))} />
+            {language ? (
+              <FieldSelect value={language} onChange={setLanguage} options={ATP_LANGUAGES.map((item) => ({ value: item.id, label: item.label }))} />
+            ) : (
+              <p className="text-sm text-muted-foreground">先选市场。不会默认成英语。</p>
+            )}
           </label>
           <label className="space-y-1 text-sm">
             地区
-            <FieldSelect value={region} onChange={setRegion} options={ATP_REGIONS.map((item) => ({ value: item.id, label: item.label }))} />
+            {region ? (
+              <FieldSelect value={region} onChange={setRegion} options={ATP_REGIONS.map((item) => ({ value: item.id, label: item.label }))} />
+            ) : (
+              <p className="text-sm text-muted-foreground">先选市场。</p>
+            )}
           </label>
           <label className="space-y-1 text-sm md:col-span-2 xl:col-span-3">
             平台
@@ -379,14 +397,19 @@ export function AtpPanel({ initialKeyword, initialMarket }: { initialKeyword: st
             />
           </label>
         </div>
+        {initialMarket === "KR" ? (
+          <p className="rounded-lg border border-dashed px-3 py-2 text-sm leading-6">
+            选品台当前市场是韩国。AnswerThePublic 的关键词检索没有韩语，这里不会改用英语或美国代替。韩语搜索量请用下面的 DataForSEO，地区选韩国，语言选韩语。
+          </p>
+        ) : null}
         <p className="text-xs leading-5 text-muted-foreground">
-          默认只查谷歌网页，避免一次把每个平台都扣掉。英国用 gb。中东不是单一地区，请选阿联酋或沙特。
+          默认只查谷歌网页，避免一次把每个平台都扣掉。英国用 gb。中东不是单一地区，请选阿联酋或沙特。西班牙和墨西哥分开，葡萄牙和巴西分开。
           {provider === "tiktok" || provider === "instagram" || provider === "all"
             ? " TikTok 和 Instagram 只认全球流，接口会把地区改成 us；Instagram 还会把语言改成 en。"
             : ""}
         </p>
         <div className="flex flex-wrap gap-2">
-          <Button disabled={checking || running || !configured || !keyword.trim()} onClick={() => void runSearch()}>
+          <Button disabled={checking || running || !configured || !keyword.trim() || marketId === "unset" || !language || !region} onClick={() => void runSearch()}>
             {running ? "检索中…" : "开始检索"}
           </Button>
           <Button variant="outline" disabled={checking} onClick={() => void refreshAccount()}>
@@ -462,7 +485,7 @@ export function AtpPanel({ initialKeyword, initialMarket }: { initialKeyword: st
                   </Button>
                 ) : null}
               </div>
-              <p className="text-xs text-muted-foreground">写入词表后，单品页能对上的词会用实测盖住示例。再读下一页或换结构都会再计一次读取额度。</p>
+              <p className="text-xs text-muted-foreground">写入关键词库后，单品页能对上的词会用实测盖住示例。来源写成 AnswerThePublic，客户归到 {assignCustomerPhrase(state.customers, state.assignCustomerId)}。再读下一页或换结构都会再计一次读取额度。</p>
               {visibleRows.length ? (
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[860px] text-left text-sm">

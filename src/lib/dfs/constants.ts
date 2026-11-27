@@ -1,6 +1,10 @@
 export const DFS_SESSION_KEY = "yixuan.dfs.session";
 
-/** Google Ads geotarget ids used by DataForSEO. Not search volumes. */
+/**
+ * Google Ads geotarget criterion IDs for countries (Target Type Country, Status Active).
+ * DataForSEO Google Ads Keywords Data uses these IDs as location_code.
+ * Checked against the Google Ads geotargets CSV dated 2026-10-06. Not search volumes.
+ */
 export const DFS_MARKETS = [
   { id: "US", label: "美国", languageCode: "en", languageLabel: "英语", locationCode: 2840, locationLabel: "美国", desk: "US" },
   { id: "UK", label: "英国", languageCode: "en", languageLabel: "英语", locationCode: 2826, locationLabel: "英国", desk: "UK" },
@@ -9,14 +13,31 @@ export const DFS_MARKETS = [
   { id: "AE", label: "中东 · 阿联酋", languageCode: "en", languageLabel: "英语", locationCode: 2784, locationLabel: "阿联酋", desk: "ME" },
   { id: "SA", label: "中东 · 沙特", languageCode: "ar", languageLabel: "阿拉伯语", locationCode: 2682, locationLabel: "沙特", desk: "ME" },
   { id: "JP", label: "日本", languageCode: "ja", languageLabel: "日语", locationCode: 2392, locationLabel: "日本", desk: "JP" },
+  { id: "ES", label: "西班牙", languageCode: "es", languageLabel: "西班牙语", locationCode: 2724, locationLabel: "西班牙", desk: "ES" },
+  { id: "MX", label: "墨西哥", languageCode: "es", languageLabel: "西班牙语", locationCode: 2484, locationLabel: "墨西哥", desk: "MX" },
+  { id: "IT", label: "意大利", languageCode: "it", languageLabel: "意大利语", locationCode: 2380, locationLabel: "意大利", desk: "IT" },
+  { id: "FR", label: "法国", languageCode: "fr", languageLabel: "法语", locationCode: 2250, locationLabel: "法国", desk: "FR" },
+  { id: "PT", label: "葡萄牙", languageCode: "pt", languageLabel: "葡萄牙语", locationCode: 2620, locationLabel: "葡萄牙", desk: "PT" },
+  { id: "BR", label: "巴西", languageCode: "pt", languageLabel: "葡萄牙语", locationCode: 2076, locationLabel: "巴西", desk: "BR" },
+  { id: "NL", label: "荷兰", languageCode: "nl", languageLabel: "荷兰语", locationCode: 2528, locationLabel: "荷兰", desk: "NL" },
+  { id: "PL", label: "波兰", languageCode: "pl", languageLabel: "波兰语", locationCode: 2616, locationLabel: "波兰", desk: "PL" },
+  { id: "KR", label: "韩国", languageCode: "ko", languageLabel: "韩语", locationCode: 2410, locationLabel: "韩国", desk: "KR" },
 ] as const;
 
 export type DfsMarketId = (typeof DFS_MARKETS)[number]["id"];
 
+/** ISO 639-1 codes. DataForSEO documents language_code as ISO 639-1. */
 export const DFS_LANGUAGES = [
   { id: "en", label: "英语" },
   { id: "de", label: "德语" },
+  { id: "es", label: "西班牙语" },
+  { id: "it", label: "意大利语" },
+  { id: "fr", label: "法语" },
+  { id: "pt", label: "葡萄牙语" },
+  { id: "nl", label: "荷兰语" },
+  { id: "pl", label: "波兰语" },
   { id: "ja", label: "日语" },
+  { id: "ko", label: "韩语" },
   { id: "ar", label: "阿拉伯语" },
 ] as const;
 

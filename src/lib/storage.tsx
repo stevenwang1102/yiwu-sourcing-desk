@@ -3,12 +3,14 @@
 import { createContext, useContext, useMemo, useSyncExternalStore } from "react";
 import { clearAtpSession } from "./atp/session";
 import { clearDfsSession } from "./dfs/session";
+import { isKeywordOrigin, normalizeCustomers, normalizeMeasured, originLabel } from "./keyword-origin";
 import { recommendFor, toStored } from "./recommend";
-import { DEFAULT_SETTINGS } from "./markets";
+import { DEFAULT_SETTINGS, mergeSavedMarkets } from "./markets";
 import type {
   AppState,
   CategoryId,
   CheckState,
+  Customer,
   Inquiry,
   MarketId,
   MeasuredKeyword,
@@ -59,6 +61,8 @@ function seedState(): AppState {
     },
     inquiries: [SEED_INQUIRY],
     cases: [saved],
+    customers: [],
+    assignCustomerId: null,
     measured: [],
     serp: [],
     notes: {},
@@ -70,15 +74,24 @@ function mergeState(raw: unknown): AppState {
   const base = seedState();
   if (!raw || typeof raw !== "object") return base;
   const data = raw as Partial<AppState>;
+  const customers = normalizeCustomers(data.customers);
+  const customerIds = new Set(customers.map((item) => item.id));
+  const assignCustomerId = typeof data.assignCustomerId === "string" && customerIds.has(data.assignCustomerId) ? data.assignCustomerId : null;
   return {
     ...base,
     ...data,
     version: 1,
-    settings: { ...base.settings, ...(data.settings ?? {}) },
+    settings: {
+      ...base.settings,
+      ...(data.settings ?? {}),
+      markets: mergeSavedMarkets(data.settings?.markets),
+    },
     workspace: { ...base.workspace, ...(data.workspace ?? {}) },
     inquiries: data.inquiries ?? base.inquiries,
     cases: data.cases ?? base.cases,
-    measured: data.measured ?? [],
+    customers,
+    assignCustomerId,
+    measured: normalizeMeasured(data.measured, customerIds),
     serp: data.serp ?? [],
     notes: data.notes ?? {},
     checks: data.checks ?? {},
@@ -97,7 +110,11 @@ interface StoreValue {
   setReportProducts: (ids: string[], caseId?: string | null) => void;
   saveCase: (inquiry: Omit<Inquiry, "id" | "createdAt" | "sampleCase">, note?: string) => string;
   deleteCase: (id: string) => void;
+  addCustomer: (name: string) => { ok: true; customer: Customer } | { ok: false; message: string };
+  removeCustomer: (id: string) => void;
+  setAssignCustomer: (id: string | null) => void;
   addMeasured: (rows: Omit<MeasuredKeyword, "id" | "pastedAt">[]) => void;
+  updateMeasured: (id: string, patch: Partial<Pick<MeasuredKeyword, "customerId" | "origin" | "keyword">>) => void;
   removeMeasured: (id: string) => void;
   addSerp: (rows: Omit<SerpRow, "id" | "pastedAt">[]) => void;
   removeSerp: (id: string) => void;
@@ -224,13 +241,67 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
               ? { ...prev.workspace, reportCaseId: null }
               : prev.workspace,
         })),
-      addMeasured: (rows) =>
+      addCustomer: (name) => {
+        const trimmed = name.trim().slice(0, 40);
+        if (!trimmed) return { ok: false, message: "请先写客户名字。" };
+        const current = getSnapshot();
+        if (current.customers.some((item) => item.name === trimmed)) {
+          return { ok: false, message: "已经有这个客户。" };
+        }
+        const customer: Customer = { id: uid("cust"), name: trimmed, createdAt: new Date().toISOString() };
+        patch((prev) => ({ ...prev, customers: [...prev.customers, customer] }));
+        return { ok: true, customer };
+      },
+      removeCustomer: (id) =>
         patch((prev) => ({
           ...prev,
-          measured: [
-            ...rows.map((row) => ({ ...row, id: uid("kw"), pastedAt: new Date().toISOString() })),
-            ...prev.measured,
-          ],
+          customers: prev.customers.filter((item) => item.id !== id),
+          assignCustomerId: prev.assignCustomerId === id ? null : prev.assignCustomerId,
+          measured: prev.measured.map((row) => (row.customerId === id ? { ...row, customerId: null } : row)),
+        })),
+      setAssignCustomer: (id) =>
+        patch((prev) => ({
+          ...prev,
+          assignCustomerId: id && prev.customers.some((item) => item.id === id) ? id : null,
+        })),
+      addMeasured: (rows) =>
+        patch((prev) => {
+          const allowed = new Set(prev.customers.map((item) => item.id));
+          return {
+            ...prev,
+            measured: [
+              ...rows.map((row) => ({
+                ...row,
+                id: uid("kw"),
+                pastedAt: new Date().toISOString(),
+                origin: isKeywordOrigin(row.origin) ? row.origin : "custom",
+                customerId: row.customerId && allowed.has(row.customerId) ? row.customerId : null,
+                source: row.source?.trim() || originLabel(isKeywordOrigin(row.origin) ? row.origin : "custom"),
+              })),
+              ...prev.measured,
+            ],
+          };
+        }),
+      updateMeasured: (id, next) =>
+        patch((prev) => ({
+          ...prev,
+          measured: prev.measured.map((row) => {
+            if (row.id !== id) return row;
+            const origin = next.origin && isKeywordOrigin(next.origin) ? next.origin : row.origin;
+            const customerId = next.customerId === undefined
+              ? row.customerId
+              : next.customerId && prev.customers.some((item) => item.id === next.customerId)
+                ? next.customerId
+                : null;
+            const keyword = next.keyword === undefined ? row.keyword : next.keyword.trim() || row.keyword;
+            return {
+              ...row,
+              keyword,
+              origin,
+              customerId,
+              source: next.origin && next.origin !== row.origin ? originLabel(origin) : row.source,
+            };
+          }),
         })),
       removeMeasured: (id) => patch((prev) => ({ ...prev, measured: prev.measured.filter((row) => row.id !== id) })),
       addSerp: (rows) =>

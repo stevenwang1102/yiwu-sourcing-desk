@@ -88,7 +88,7 @@ export function RecommendScreen() {
             <Field label="客户称呼"><Input value={form.customer} placeholder="公司或联系人" onChange={(event) => setForm({ ...form, customer: event.target.value })} /></Field>
             <div className="grid grid-cols-2 gap-2">
               <Field label="市场">
-                <FieldSelect value={form.market} onChange={(value) => setForm({ ...form, market: value as MarketId })} options={MARKETS.filter((item) => settings.markets.includes(item.id)).map((item) => ({ value: item.id, label: item.name }))} />
+                <FieldSelect value={form.market} onChange={(value) => setForm({ ...form, market: value as MarketId })} options={MARKETS.filter((item) => settings.markets.includes(item.id)).map((item) => ({ value: item.id, label: `${item.name} · ${item.lang}` }))} />
               </Field>
               <Field label="类目">
                 <FieldSelect value={form.category} onChange={(value) => setForm({ ...form, category: value as CategoryId })} options={CATEGORIES.filter((item) => settings.categories.includes(item.id)).map((item) => ({ value: item.id, label: item.name }))} />
