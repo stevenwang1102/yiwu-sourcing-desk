@@ -5,6 +5,7 @@ import { clearAtpSession } from "./atp/session";
 import { clearDfsSession } from "./dfs/session";
 import { isKeywordOrigin, normalizeCustomers, normalizeMeasured, originLabel } from "./keyword-origin";
 import { recommendFor, toStored } from "./recommend";
+import { LEGACY_PRODUCT_NAME_ZH } from "./brand";
 import { DEFAULT_SETTINGS, mergeSavedMarkets } from "./markets";
 import type {
   AppState,
@@ -70,6 +71,13 @@ function seedState(): AppState {
   };
 }
 
+function migrateCompanyName(saved: unknown) {
+  if (typeof saved !== "string" || saved.trim() === "" || saved.trim() === LEGACY_PRODUCT_NAME_ZH) {
+    return DEFAULT_SETTINGS.companyName;
+  }
+  return saved;
+}
+
 function mergeState(raw: unknown): AppState {
   const base = seedState();
   if (!raw || typeof raw !== "object") return base;
@@ -85,6 +93,7 @@ function mergeState(raw: unknown): AppState {
       ...base.settings,
       ...(data.settings ?? {}),
       markets: mergeSavedMarkets(data.settings?.markets),
+      companyName: migrateCompanyName(data.settings?.companyName),
     },
     workspace: { ...base.workspace, ...(data.workspace ?? {}) },
     inquiries: data.inquiries ?? base.inquiries,
