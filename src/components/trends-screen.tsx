@@ -31,7 +31,7 @@ export function TrendsScreen() {
             ))}
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground">这个市场没有主推单品。换一个市场，或到设置里打开类目。</p>
+          <p className="text-sm text-muted-foreground">这个市场的目录没有主推单品，所以没有示例趋势。搜索量保持未知，到数据工位按这个国家的语言查。</p>
         )}
       </section>
       <Board title="示例趋势向上" cards={board.rising} empty="当前筛选里没有被标成上行的单品。" onReport={(id) => setReportProducts([id], null)} />

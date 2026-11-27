@@ -1,6 +1,21 @@
 export type CategoryId = "3c" | "wellness" | "home" | "kids" | "funny";
 
-export type MarketId = "US" | "UK" | "DE" | "AU" | "ME" | "JP";
+export type MarketId =
+  | "US"
+  | "UK"
+  | "DE"
+  | "AU"
+  | "ME"
+  | "JP"
+  | "ES"
+  | "MX"
+  | "IT"
+  | "FR"
+  | "PT"
+  | "BR"
+  | "NL"
+  | "PL"
+  | "KR";
 
 export type Provenance = "sample" | "measured" | "unknown" | "assumption";
 

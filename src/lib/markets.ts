@@ -84,7 +84,127 @@ export const MARKETS: {
     intent: 3,
     aio: -2,
   },
+  {
+    id: "ES",
+    name: "西班牙",
+    nameEn: "Spain",
+    lang: "西班牙语",
+    note: "目录没有把西班牙列为主推，大盘搜索量保持未知，不是 0。西班牙语要到数据工位按西班牙单独查。CE 与玩具、电器规则需核实。",
+    sv: 0.22,
+    cpc: 0.75,
+    kd: -2,
+    intent: 0,
+    aio: -6,
+  },
+  {
+    id: "MX",
+    name: "墨西哥",
+    nameEn: "Mexico",
+    lang: "西班牙语",
+    note: "墨西哥是单独的西语市场，不并进西班牙。目录没有主推，搜索量保持未知。NOM 与标签需核实。",
+    sv: 0.18,
+    cpc: 0.6,
+    kd: -6,
+    intent: -1,
+    aio: -8,
+  },
+  {
+    id: "IT",
+    name: "意大利",
+    nameEn: "Italy",
+    lang: "意大利语",
+    note: "目录没有把意大利列为主推，大盘搜索量保持未知。意大利语要单独查，不能搬德国或英语的示例倍率。",
+    sv: 0.2,
+    cpc: 0.72,
+    kd: -2,
+    intent: 0,
+    aio: -6,
+  },
+  {
+    id: "FR",
+    name: "法国",
+    nameEn: "France",
+    lang: "法语",
+    note: "目录没有把法国列为主推，大盘搜索量保持未知。法语词单独查。包装与电器规则需核实。",
+    sv: 0.24,
+    cpc: 0.78,
+    kd: -1,
+    intent: 1,
+    aio: -6,
+  },
+  {
+    id: "PT",
+    name: "葡萄牙",
+    nameEn: "Portugal",
+    lang: "葡萄牙语",
+    note: "葡萄牙和巴西分开，不合成一个葡语区。目录没有主推，搜索量保持未知。",
+    sv: 0.08,
+    cpc: 0.55,
+    kd: -8,
+    intent: -2,
+    aio: -8,
+  },
+  {
+    id: "BR",
+    name: "巴西",
+    nameEn: "Brazil",
+    lang: "葡萄牙语",
+    note: "巴西用葡萄牙语，地区是巴西，不是葡萄牙。目录没有主推，搜索量保持未知。INMETRO 一类要求需核实。",
+    sv: 0.2,
+    cpc: 0.5,
+    kd: -4,
+    intent: -1,
+    aio: -8,
+  },
+  {
+    id: "NL",
+    name: "荷兰",
+    nameEn: "Netherlands",
+    lang: "荷兰语",
+    note: "目录没有把荷兰列为主推，大盘搜索量保持未知。荷兰语要单独查。",
+    sv: 0.1,
+    cpc: 0.8,
+    kd: -4,
+    intent: 0,
+    aio: -6,
+  },
+  {
+    id: "PL",
+    name: "波兰",
+    nameEn: "Poland",
+    lang: "波兰语",
+    note: "目录没有把波兰列为主推，大盘搜索量保持未知。波兰语要单独查。",
+    sv: 0.12,
+    cpc: 0.45,
+    kd: -6,
+    intent: -1,
+    aio: -8,
+  },
+  {
+    id: "KR",
+    name: "韩国",
+    nameEn: "South Korea",
+    lang: "韩语",
+    note: "目录没有把韩国列为主推，大盘搜索量保持未知。韩语搜索量只走 DataForSEO。AnswerThePublic 没有韩语关键词检索，不会改用英语代替。KC、电器规则需核实。",
+    sv: 0.16,
+    cpc: 0.7,
+    kd: 2,
+    intent: 1,
+    aio: -4,
+  },
 ];
+
+/** Markets shipped before the smaller-language list. An unchanged saved list picks up the new countries once. */
+const LEGACY_MARKETS: MarketId[] = ["US", "UK", "DE", "AU", "ME", "JP"];
+
+export function mergeSavedMarkets(saved: readonly string[] | undefined): MarketId[] {
+  const known = new Set<string>(MARKETS.map((item) => item.id));
+  if (!saved?.length) return DEFAULT_SETTINGS.markets.slice();
+  const current = saved.filter((id): id is MarketId => known.has(id));
+  const untouched = current.length === LEGACY_MARKETS.length && LEGACY_MARKETS.every((id) => current.includes(id));
+  if (untouched) return DEFAULT_SETTINGS.markets.slice();
+  return current.length ? current : DEFAULT_SETTINGS.markets.slice();
+}
 
 export const MARKET_MAP = Object.fromEntries(MARKETS.map((m) => [m.id, m])) as Record<
   MarketId,
@@ -198,7 +318,7 @@ export const CERT_OPTIONS = [
 export const DEFAULT_SETTINGS: Settings = {
   companyName: "义乌选品台",
   defaultMarket: "US",
-  markets: ["US", "UK", "DE", "AU", "ME", "JP"],
+  markets: ["US", "UK", "DE", "AU", "ME", "JP", "ES", "MX", "IT", "FR", "PT", "BR", "NL", "PL", "KR"],
   categories: ["3c", "wellness", "home", "kids", "funny"],
   currency: "USD",
   fxUsdCny: 7.2,

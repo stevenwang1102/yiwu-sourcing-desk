@@ -5,7 +5,7 @@ import { clearAtpSession } from "./atp/session";
 import { clearDfsSession } from "./dfs/session";
 import { isKeywordOrigin, normalizeCustomers, normalizeMeasured, originLabel } from "./keyword-origin";
 import { recommendFor, toStored } from "./recommend";
-import { DEFAULT_SETTINGS } from "./markets";
+import { DEFAULT_SETTINGS, mergeSavedMarkets } from "./markets";
 import type {
   AppState,
   CategoryId,
@@ -81,7 +81,11 @@ function mergeState(raw: unknown): AppState {
     ...base,
     ...data,
     version: 1,
-    settings: { ...base.settings, ...(data.settings ?? {}) },
+    settings: {
+      ...base.settings,
+      ...(data.settings ?? {}),
+      markets: mergeSavedMarkets(data.settings?.markets),
+    },
     workspace: { ...base.workspace, ...(data.workspace ?? {}) },
     inquiries: data.inquiries ?? base.inquiries,
     cases: data.cases ?? base.cases,

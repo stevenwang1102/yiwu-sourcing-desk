@@ -88,7 +88,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
             <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setOpen(true)} aria-label="打开菜单">
               {open ? <X /> : <Menu />}
             </Button>
-            <div className="min-w-[140px] flex-1 md:max-w-[180px] md:flex-none">
+            <div className="min-w-[220px] flex-1 md:w-[280px] md:flex-none">
               <FieldSelect
                 value={workspace.market}
                 onChange={(value) => setMarket(value as typeof workspace.market)}
